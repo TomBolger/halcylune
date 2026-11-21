@@ -6,6 +6,9 @@ on:
       - 'config-page/**'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -48,3 +51,13 @@ jobs:
           name: halcyon-pbw
           path: build/*.pbw
           if-no-files-found: error
+
+      - name: Publish PBW as a release
+        if: github.ref_type == 'branch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="build-${GITHUB_REF_NAME}"
+          gh release delete "$tag" --yes --cleanup-tag || true
+          gh release create "$tag" build/*.pbw --prerelease --target "$GITHUB_SHA" \
+            --title "Latest ${GITHUB_REF_NAME} build" --notes "Built from ${GITHUB_SHA}"
