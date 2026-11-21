@@ -49,14 +49,14 @@ static double wrap_degrees(double deg) {
   return deg;
 }
 
-static float sin_deg(double deg) {
+static double sin_deg(double deg) {
   int32_t angle = (int32_t)(wrap_degrees(deg) * TRIG_MAX_ANGLE / 360.0);
-  return (float)sin_lookup(angle) / TRIG_MAX_RATIO;
+  return (double)sin_lookup(angle) / TRIG_MAX_RATIO;
 }
 
-static float cos_deg(double deg) {
+static double cos_deg(double deg) {
   int32_t angle = (int32_t)(wrap_degrees(deg) * TRIG_MAX_ANGLE / 360.0);
-  return (float)cos_lookup(angle) / TRIG_MAX_RATIO;
+  return (double)cos_lookup(angle) / TRIG_MAX_RATIO;
 }
 
 // no libm on the watch
@@ -114,7 +114,7 @@ void moon_draw(GContext *ctx, GPoint center, int radius, float elongation,
   // w, it sits at x = w * cos(elongation). Waxing moons are lit on the right
   // of it, waning moons on the left (as seen from the northern hemisphere).
   bool waxing = elongation < 180.0f;
-  float terminator = cos_deg(elongation);
+  float terminator = (float)cos_deg((double)elongation);
 
   // the lit disk is a touch smaller than radius so that, with its outline, it
   // comes out the same size as the sun

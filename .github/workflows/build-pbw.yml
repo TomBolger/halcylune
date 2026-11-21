@@ -28,7 +28,19 @@ jobs:
         run: yes | pebble sdk install latest
 
       - name: Build
-        run: yes | pebble build
+        shell: bash
+        run: |
+          set +e
+          yes | pebble build > build.log 2>&1
+          status=$?
+          cat build.log
+          if [ $status -ne 0 ]; then
+            # surface the failure as an annotation (readable without sign-in)
+            summary=$( (grep -iE "error|fatal|Traceback|failed" build.log | head -25; echo '--- last lines ---'; tail -15 build.log) \
+              | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=pebble build failed::${summary}"
+          fi
+          exit $status
 
       - name: Upload PBW
         uses: actions/upload-artifact@v4
