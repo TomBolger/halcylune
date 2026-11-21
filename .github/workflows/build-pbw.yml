@@ -1,0 +1,38 @@
+name: Build PBW
+
+on:
+  push:
+    paths-ignore:
+      - 'config-page/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pebble-tool
+        run: uv tool install pebble-tool --python 3.13
+
+      - name: Install Pebble SDK
+        run: yes | pebble sdk install latest
+
+      - name: Build
+        run: yes | pebble build
+
+      - name: Upload PBW
+        uses: actions/upload-artifact@v4
+        with:
+          name: halcyon-pbw
+          path: build/*.pbw
+          if-no-files-found: error

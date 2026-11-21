@@ -361,6 +361,11 @@ export const SettingsPage: React.FC = () => {
             { label: 'None', value: 2 },
           ]}
         />
+        <Toggle
+          label="Show moon"
+          description="Show the moon and its current phase on the ring alongside the sun"
+          messageKey="SETTING_SHOW_MOON"
+        />
       </Section>
       <DonationLink />
     </Page>

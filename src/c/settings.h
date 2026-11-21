@@ -157,6 +157,7 @@ typedef struct {
   bool usePrimaryFontForAllWidgets;
   bool enableStatusBar;
   bool statusShowConnection; // show "connected" icon even when connected
+  bool showMoon;             // show the moon and its phase on the ring
 } Settings;
 
 typedef struct {
@@ -218,6 +219,7 @@ typedef struct {
   bool usePrimaryFontForAllWidgets;
   bool enableStatusBar;
   bool statusShowConnection; // show "connected" icon even when connected
+  bool showMoon;             // show the moon and its phase on the ring
 } StoredSettingsExtra;
 
 typedef char StoredSettings_must_fit_in_persist_data

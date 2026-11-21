@@ -19,6 +19,7 @@ static void populateStoredSettingsExtra(StoredSettingsExtra *storedSettingsExtra
   storedSettingsExtra->usePrimaryFontForAllWidgets =
       globalSettings.usePrimaryFontForAllWidgets;
   storedSettingsExtra->enableStatusBar = globalSettings.enableStatusBar;
+  storedSettingsExtra->showMoon = globalSettings.showMoon;
   storedSettingsExtra->statusShowConnection =
       globalSettings.statusShowConnection;
 }
@@ -96,6 +97,7 @@ void Settings_loadFromStorage() {
   globalSettings.usePrimaryFontForAllWidgets = false;
   globalSettings.enableStatusBar = true;
   globalSettings.statusShowConnection = false;
+  globalSettings.showMoon = true;
 
   if (persist_exists(SETTINGS_PERSIST_KEY)) {
     const int stored_size = persist_get_size(SETTINGS_PERSIST_KEY);
@@ -133,6 +135,7 @@ void Settings_loadFromStorage() {
       globalSettings.usePrimaryFontForAllWidgets =
           storedSettingsExtra.usePrimaryFontForAllWidgets;
       globalSettings.enableStatusBar = storedSettingsExtra.enableStatusBar;
+      globalSettings.showMoon = storedSettingsExtra.showMoon;
       globalSettings.statusShowConnection =
           storedSettingsExtra.statusShowConnection;
     }

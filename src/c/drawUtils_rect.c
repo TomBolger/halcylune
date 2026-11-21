@@ -1,6 +1,7 @@
 #ifdef PBL_RECT
 
 #include "drawUtils.h"
+#include "moonUtils.h"
 #include "settings.h"
 #include "solarUtils.h"
 #include "utils.h"
@@ -335,7 +336,18 @@ void draw_ring_layer(Layer *layer, GContext *ctx) {
       ctx, GRect(twilightEndRect.origin.x - 2, twilightEndRect.origin.y - 2,
                  twilightEndRect.size.w + 4, twilightEndRect.size.h + 4));
 
+  // the moon goes under the sun, so a new moon hides behind it
+  if (globalSettings.showMoon) {
+    float elongation = moon_get_elongation(time(NULL));
+    int moonMinute = moon_get_ring_minute(
+        timeInfo->tm_hour * 60 + timeInfo->tm_min, elongation);
+    GPoint moonPos = get_track_position((moonMinute + 15 * 60) % (24 * 60),
+                                        sunBounds, pipRect);
+    moon_draw(ctx, moonPos, SUN_DIAMETER, elongation, &currentTheme);
+  }
+
   // cue the sun!
+  graphics_context_set_stroke_width(ctx, strokeWidth);
   graphics_context_set_fill_color(ctx, currentTheme.sunFillColor);
   graphics_context_set_stroke_color(ctx, currentTheme.sunStrokeColor);
   graphics_fill_circle(ctx, sunPos, SUN_DIAMETER);

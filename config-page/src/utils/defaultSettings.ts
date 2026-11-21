@@ -38,6 +38,7 @@ export const getDefaultSettings = (capabilities: Capabilities): Settings => ({
   SETTING_SHOW_LEADING_ZERO: 0,
   SETTING_STATUS_BAR_ENABLED: 1,
   SETTING_STATUS_SHOW_CONNECTION: 0,
+  SETTING_SHOW_MOON: 1,
   // Widget slots default to format strings
   SETTING_WIDGET_UPPER_SECONDARY: WIDGETS.FORECAST,
   SETTING_WIDGET_UPPER_PRIMARY: WIDGETS.CONDITION,

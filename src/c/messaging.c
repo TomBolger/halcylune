@@ -91,6 +91,7 @@ void inbox_received_callback(DictionaryIterator *iterator, void *context) {
 
   Tuple *enableStatusBar_tuple =
       dict_find(iterator, MESSAGE_KEY_SETTING_STATUS_BAR_ENABLED);
+  Tuple *showMoon_tuple = dict_find(iterator, MESSAGE_KEY_SETTING_SHOW_MOON);
   Tuple *statusShowConnection_tuple =
       dict_find(iterator, MESSAGE_KEY_SETTING_STATUS_SHOW_CONNECTION);
 
@@ -279,6 +280,10 @@ void inbox_received_callback(DictionaryIterator *iterator, void *context) {
 
   if (enableStatusBar_tuple != NULL) {
     globalSettings.enableStatusBar = (bool)enableStatusBar_tuple->value->int8;
+  }
+
+  if (showMoon_tuple != NULL) {
+    globalSettings.showMoon = (bool)showMoon_tuple->value->int8;
   }
 
   if (statusShowConnection_tuple != NULL) {

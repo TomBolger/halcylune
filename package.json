@@ -87,7 +87,8 @@
       "WATCH_IS_24H",
       "SETTING_USE_PRIMARY_WIDGET_FONT",
       "SETTING_STATUS_BAR_ENABLED",
-      "SETTING_STATUS_SHOW_CONNECTION"
+      "SETTING_STATUS_SHOW_CONNECTION",
+      "SETTING_SHOW_MOON"
     ],
     "resources": {
       "media": [

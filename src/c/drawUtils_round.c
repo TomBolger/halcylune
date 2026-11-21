@@ -1,6 +1,7 @@
 #ifdef PBL_ROUND
 
 #include "drawUtils.h"
+#include "moonUtils.h"
 #include "settings.h"
 #include "solarUtils.h"
 #include "utils.h"
@@ -162,6 +163,18 @@ void draw_ring_layer(Layer *layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, currentTheme.ringSunsetColor);
   graphics_fill_radial(ctx, draw_bounds, GOvalScaleModeFitCircle,
                        expanded_thickness, sunsetStartAngle, sunsetEndAngle);
+
+  // the moon goes under the sun, so a new moon hides behind it
+  if (globalSettings.showMoon) {
+    float elongation = moon_get_elongation(time(NULL));
+    int moonMinute = moon_get_ring_minute(hour * 60 + minute, elongation);
+    int moonAngle =
+        (int)(TRIG_MAX_ANGLE *
+              (((moonMinute + hourShift * 60) % (24 * 60)) / 1440.0f));
+    GPoint moonPos =
+        gpoint_from_polar(sunBoundingRect, GOvalScaleModeFitCircle, moonAngle);
+    moon_draw(ctx, moonPos, SUN_DIAMETER, elongation, &currentTheme);
+  }
 
   // Draw the sun position
   graphics_context_set_stroke_width(ctx, strokeWidth);
