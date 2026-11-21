@@ -40,23 +40,35 @@ static const Mare MARIA[] = {
 };
 #define NUM_MARIA (sizeof(MARIA) / sizeof(MARIA[0]))
 
-static double wrap_degrees(double deg) {
-  long turns = (long)(deg / 360.0);
-  deg -= turns * 360.0;
+// Everything here sticks to float: the watch has no FPU, and pulling in the
+// soft-double routines costs more flash than aplite has to spare.
+static float wrap_degrees(float deg) {
+  int32_t turns = (int32_t)(deg / 360.0f);
+  deg -= (float)turns * 360.0f;
   if (deg < 0) {
-    deg += 360.0;
+    deg += 360.0f;
   }
   return deg;
 }
 
-static double sin_deg(double deg) {
-  int32_t angle = (int32_t)(wrap_degrees(deg) * TRIG_MAX_ANGLE / 360.0);
-  return (double)sin_lookup(angle) / TRIG_MAX_RATIO;
+static int32_t to_trig_angle(float deg) {
+  return (int32_t)(wrap_degrees(deg) * ((float)TRIG_MAX_ANGLE / 360.0f));
 }
 
-static double cos_deg(double deg) {
-  int32_t angle = (int32_t)(wrap_degrees(deg) * TRIG_MAX_ANGLE / 360.0);
-  return (double)cos_lookup(angle) / TRIG_MAX_RATIO;
+static float sin_deg(float deg) {
+  return (float)sin_lookup(to_trig_angle(deg)) / (float)TRIG_MAX_RATIO;
+}
+
+static float cos_deg(float deg) {
+  return (float)cos_lookup(to_trig_angle(deg)) / (float)TRIG_MAX_RATIO;
+}
+
+// base + rate * days, wrapped to [0, 360). Whole and fractional days are
+// scaled separately so a float keeps enough precision decades from J2000.
+static float mean_angle(float base, float rate, int32_t wholeDays,
+                        float dayFraction) {
+  return wrap_degrees(base + wrap_degrees(rate * (float)wholeDays) +
+                      rate * dayFraction);
 }
 
 // no libm on the watch
@@ -74,19 +86,21 @@ static float sqrt_f(float x) {
 static int round_f(float x) { return (int)(x < 0 ? x - 0.5f : x + 0.5f); }
 
 float moon_get_elongation(time_t utcTime) {
-  double days = (double)(utcTime - J2000_UNIX) / 86400.0;
+  int32_t seconds = (int32_t)(utcTime - J2000_UNIX);
+  int32_t wholeDays = seconds / 86400;
+  float dayFraction = (float)(seconds % 86400) / 86400.0f;
 
   // mean elongation of the moon, mean anomaly of the sun and of the moon
-  double D = wrap_degrees(297.8501921 + 12.19074912 * days);
-  double M = wrap_degrees(357.5291092 + 0.98560028 * days);
-  double Mp = wrap_degrees(134.9633964 + 13.06499295 * days);
+  float D = mean_angle(297.8501921f, 12.19074912f, wholeDays, dayFraction);
+  float M = mean_angle(357.5291092f, 0.98560028f, wholeDays, dayFraction);
+  float Mp = mean_angle(134.9633964f, 13.06499295f, wholeDays, dayFraction);
 
   // largest periodic terms of the moon's longitude relative to the sun's
-  double elongation = D + 6.289 * sin_deg(Mp) - 2.100 * sin_deg(M) +
-                      1.274 * sin_deg(2 * D - Mp) + 0.658 * sin_deg(2 * D) +
-                      0.214 * sin_deg(2 * Mp) - 0.110 * sin_deg(D);
+  float elongation = D + 6.289f * sin_deg(Mp) - 2.100f * sin_deg(M) +
+                     1.274f * sin_deg(2 * D - Mp) + 0.658f * sin_deg(2 * D) +
+                     0.214f * sin_deg(2 * Mp) - 0.110f * sin_deg(D);
 
-  return (float)wrap_degrees(elongation);
+  return wrap_degrees(elongation);
 }
 
 int moon_get_ring_minute(int localMinuteOfDay, float elongation) {
@@ -114,7 +128,7 @@ void moon_draw(GContext *ctx, GPoint center, int radius, float elongation,
   // w, it sits at x = w * cos(elongation). Waxing moons are lit on the right
   // of it, waning moons on the left (as seen from the northern hemisphere).
   bool waxing = elongation < 180.0f;
-  float terminator = (float)cos_deg((double)elongation);
+  float terminator = cos_deg(elongation);
 
   // the lit disk is a touch smaller than radius so that, with its outline, it
   // comes out the same size as the sun
